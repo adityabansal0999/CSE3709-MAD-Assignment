@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">Q1_CurrencyConverter</string>
+    <string name="app_name">Currency Converter</string>
+    <string name="enter_amount">Enter Amount</string>
+    <string name="convert">Convert</string>
+
+    <string-array name="currency_array">
+        <item>INR</item>
+        <item>USD</item>
+        <item>EUR</item>
+        <item>JPY</item>
+    </string-array>
 </resources>
