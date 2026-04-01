@@ -9,7 +9,8 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 /**
  * SettingsActivity:
- * Allows user to toggle between Light and Dark theme.
+ * This activity allows the user to switch between Light and Dark themes.
+ * It uses SharedPreferences to save user preference.
  */
 public class SettingsActivity extends AppCompatActivity {
 
@@ -19,41 +20,47 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        // Set title of this screen
+        setTitle(R.string.settings);
+
         // Enable back button in Action Bar
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // Initialize switch
+        // Initialize theme switch
         Switch themeSwitch = findViewById(R.id.themeSwitch);
 
-        // Access saved preferences
+        // Access SharedPreferences
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+
+        // Get saved theme value (default = false → Light Mode)
         boolean isDarkMode = prefs.getBoolean("dark", false);
 
-        // Set switch state based on saved value
+        // Set switch state
         themeSwitch.setChecked(isDarkMode);
 
-        // Listener for toggle
+        // Listener for switch toggle
         themeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
 
             // Save preference
             prefs.edit().putBoolean("dark", isChecked).apply();
 
-            // Apply theme
-            AppCompatDelegate.setDefaultNightMode(
-                    isChecked ? AppCompatDelegate.MODE_NIGHT_YES
-                            : AppCompatDelegate.MODE_NIGHT_NO
-            );
+            // Apply theme dynamically
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
         });
     }
 
     /**
-     * Handles back button press in Action Bar
+     * Handles Action Bar back button click
      */
     @Override
     public boolean onSupportNavigateUp() {
-        finish(); // Go back to MainActivity
+        finish(); // Close SettingsActivity and go back
         return true;
     }
 }
