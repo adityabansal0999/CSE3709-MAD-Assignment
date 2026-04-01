@@ -2,6 +2,7 @@
     <string name="app_name">Currency Converter</string>
     <string name="enter_amount">Enter Amount</string>
     <string name="convert">Convert</string>
+    <string name="settings">Settings</string>
 
     <string-array name="currency_array">
         <item>INR</item>
