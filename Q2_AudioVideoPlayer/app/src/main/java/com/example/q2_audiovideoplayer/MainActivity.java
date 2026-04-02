@@ -4,55 +4,50 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.VideoView;
+import android.widget.*;
 
-import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.IOException;
-
+/**
+ * Audio + Video Player App
+ * - Plays audio from device
+ * - Streams video from URL
+ * - Handles clear + replay correctly
+ */
 public class MainActivity extends AppCompatActivity {
 
-    // audio views
+    // ===== AUDIO =====
     Button btnOpenFile, btnAudioPlay, btnAudioPause, btnAudioStop, btnAudioRestart;
     TextView txtFileName, txtAudioStatus;
     SeekBar seekbarAudio;
 
-    // video views
+    MediaPlayer audioPlayer;
+    boolean audioReady = false;
+    Uri audioUri;
+
+    // ===== VIDEO =====
     Button btnOpenUrl, btnVideoPlay, btnVideoPause, btnVideoStop, btnVideoRestart;
     EditText editUrl;
     VideoView videoView;
     TextView txtVideoStatus;
 
-    // MediaPlayer for audio
-    MediaPlayer audioPlayer;
-    boolean audioReady = false;
-    Uri audioUri;
-
-    // handler for updating seekbar
-    Handler handler = new Handler();
-
-    // video state
     boolean videoReady = false;
 
-    // file picker launcher
+    // ⭐ IMPORTANT: store last video URL
+    String currentVideoUrl = "";
+
+    Handler handler = new Handler();
+
     ActivityResultLauncher<String> filePicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // find audio views
+        // ===== AUDIO VIEWS =====
         btnOpenFile = findViewById(R.id.btn_open_file);
         btnAudioPlay = findViewById(R.id.btn_audio_play);
         btnAudioPause = findViewById(R.id.btn_audio_pause);
@@ -62,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         txtAudioStatus = findViewById(R.id.txt_audio_status);
         seekbarAudio = findViewById(R.id.seekbar_audio);
 
-        // find video views
+        // ===== VIDEO VIEWS =====
         btnOpenUrl = findViewById(R.id.btn_open_url);
         btnVideoPlay = findViewById(R.id.btn_video_play);
         btnVideoPause = findViewById(R.id.btn_video_pause);
@@ -72,10 +67,9 @@ public class MainActivity extends AppCompatActivity {
         videoView = findViewById(R.id.video_view);
         txtVideoStatus = findViewById(R.id.txt_video_status);
 
-        // create MediaPlayer
         audioPlayer = new MediaPlayer();
 
-        // setup file picker to choose audio from device
+        // File picker
         filePicker = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 result -> {
@@ -83,276 +77,194 @@ public class MainActivity extends AppCompatActivity {
                         audioUri = result;
                         loadAudio(audioUri);
                     }
-                }
-        );
+                });
 
-        // pre-fill a sample video URL for testing
-        editUrl.setText(
-                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
+        // Default working URL
+        editUrl.setText("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
 
-        // setup all button listeners
-        setupAudioButtons();
-        setupVideoButtons();
-        setupSeekBar();
+        setupAudio();
+        setupVideo();
+
+        // Video controller UI
+        MediaController controller = new MediaController(this);
+        controller.setAnchorView(videoView);
+        videoView.setMediaController(controller);
     }
 
-    // loads audio file into MediaPlayer
+    // ===== AUDIO =====
+
     private void loadAudio(Uri uri) {
         try {
             audioPlayer.reset();
             audioPlayer.setDataSource(this, uri);
             audioPlayer.prepare();
-            audioReady = true;
 
+            audioReady = true;
             seekbarAudio.setMax(audioPlayer.getDuration());
-            seekbarAudio.setProgress(0);
 
             txtFileName.setText("File: " + uri.getLastPathSegment());
             txtAudioStatus.setText("Status: Ready");
-            Toast.makeText(this, "Audio loaded", Toast.LENGTH_SHORT).show();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             Toast.makeText(this, "Error loading audio", Toast.LENGTH_SHORT).show();
-            audioReady = false;
         }
     }
 
-    // all audio button click listeners
-    private void setupAudioButtons() {
+    private void setupAudio() {
 
-        // open file picker
-        btnOpenFile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                filePicker.launch("audio/*");
+        btnOpenFile.setOnClickListener(v -> filePicker.launch("audio/*"));
+
+        btnAudioPlay.setOnClickListener(v -> {
+            if (!audioReady) {
+                Toast.makeText(this, "Select audio first", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            audioPlayer.start();
+            txtAudioStatus.setText("Status: Playing");
+            updateSeekBar();
+        });
+
+        btnAudioPause.setOnClickListener(v -> {
+            if (audioPlayer.isPlaying()) {
+                audioPlayer.pause();
+                txtAudioStatus.setText("Status: Paused");
             }
         });
 
-        // play
-        btnAudioPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!audioReady) {
-                    Toast.makeText(MainActivity.this,
-                            "Open an audio file first", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (!audioPlayer.isPlaying()) {
-                    audioPlayer.start();
-                    txtAudioStatus.setText("Status: Playing");
-                    updateSeekBar();
-                }
+        btnAudioStop.setOnClickListener(v -> {
+            if (audioReady) {
+                audioPlayer.stop();
+                txtAudioStatus.setText("Status: Stopped");
+                audioReady = false;
+
+                if (audioUri != null) loadAudio(audioUri);
             }
         });
 
-        // pause
-        btnAudioPause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (audioPlayer.isPlaying()) {
-                    audioPlayer.pause();
-                    txtAudioStatus.setText("Status: Paused");
-                }
+        btnAudioRestart.setOnClickListener(v -> {
+            if (audioReady) {
+                audioPlayer.seekTo(0);
+                audioPlayer.start();
+                txtAudioStatus.setText("Status: Playing");
             }
         });
 
-        // stop
-        btnAudioStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (audioReady) {
-                    audioPlayer.stop();
-                    seekbarAudio.setProgress(0);
-                    txtAudioStatus.setText("Status: Stopped");
-                    audioReady = false;
-
-                    // after stop we need to reload the file
-                    if (audioUri != null) {
-                        loadAudio(audioUri);
-                    }
-                }
-            }
-        });
-
-        // restart from beginning
-        btnAudioRestart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (audioReady) {
-                    audioPlayer.seekTo(0);
-                    if (!audioPlayer.isPlaying()) {
-                        audioPlayer.start();
-                    }
-                    txtAudioStatus.setText("Status: Playing");
-                    updateSeekBar();
-                }
-            }
-        });
-    }
-
-    // seekbar listener so user can drag to change position
-    private void setupSeekBar() {
         seekbarAudio.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            public void onProgressChanged(SeekBar sb, int progress, boolean fromUser) {
                 if (fromUser && audioReady) {
                     audioPlayer.seekTo(progress);
                 }
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar sb) {}
+            public void onStopTrackingTouch(SeekBar sb) {}
         });
     }
 
-    // keeps updating seekbar position while audio plays
     private void updateSeekBar() {
-        if (audioPlayer != null && audioPlayer.isPlaying()) {
+        if (audioPlayer.isPlaying()) {
             seekbarAudio.setProgress(audioPlayer.getCurrentPosition());
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    updateSeekBar();
-                }
-            }, 500);
+            handler.postDelayed(this::updateSeekBar, 500);
         }
     }
 
-    // loads video from url into VideoView
+    // ===== VIDEO =====
+
     private void loadVideo(String url) {
         try {
-            Uri videoUri = Uri.parse(url);
-            videoView.setVideoURI(videoUri);
+            Uri uri = Uri.parse(url);
+
+            videoView.setVideoURI(uri);
             txtVideoStatus.setText("Status: Loading...");
 
-            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    videoReady = true;
-                    txtVideoStatus.setText("Status: Ready");
-                    Toast.makeText(MainActivity.this,
-                            "Video loaded", Toast.LENGTH_SHORT).show();
-                }
+            videoView.setOnPreparedListener(mp -> {
+                videoReady = true;
+                txtVideoStatus.setText("Status: Ready");
+
+                videoView.start();
+                videoView.pause();
             });
 
-            videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    txtVideoStatus.setText("Status: Finished");
-                }
+            videoView.setOnCompletionListener(mp ->
+                    txtVideoStatus.setText("Status: Finished"));
+
+            videoView.setOnErrorListener((mp, what, extra) -> {
+                txtVideoStatus.setText("Status: Error");
+                Toast.makeText(this,
+                        "Video not supported / network issue",
+                        Toast.LENGTH_LONG).show();
+                videoReady = false;
+                return true;
             });
 
-            videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                @Override
-                public boolean onError(MediaPlayer mp, int what, int extra) {
-                    Toast.makeText(MainActivity.this,
-                            "Error loading video", Toast.LENGTH_SHORT).show();
-                    txtVideoStatus.setText("Status: Error");
-                    videoReady = false;
-                    return true;
-                }
-            });
+            videoView.requestFocus();
 
         } catch (Exception e) {
             Toast.makeText(this, "Invalid URL", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // all video button click listeners
-    private void setupVideoButtons() {
+    private void setupVideo() {
 
-        // open url
-        btnOpenUrl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String url = editUrl.getText().toString().trim();
-                if (url.isEmpty()) {
-                    Toast.makeText(MainActivity.this,
-                            "Enter a video URL", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                loadVideo(url);
+        // OPEN URL
+        btnOpenUrl.setOnClickListener(v -> {
+            String url = editUrl.getText().toString().trim();
+            if (url.isEmpty()) {
+                Toast.makeText(this, "Enter URL", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            currentVideoUrl = url; // ⭐ SAVE URL
+            loadVideo(url);
+        });
+
+        // PLAY
+        btnVideoPlay.setOnClickListener(v -> {
+
+            // ⭐ reload if cleared
+            if (!videoReady && !currentVideoUrl.isEmpty()) {
+                loadVideo(currentVideoUrl);
+                return;
+            }
+
+            if (videoReady) {
+                videoView.start();
+                txtVideoStatus.setText("Status: Playing");
             }
         });
 
-        // play
-        btnVideoPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!videoReady) {
-                    Toast.makeText(MainActivity.this,
-                            "Load a video first", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (!videoView.isPlaying()) {
-                    videoView.start();
-                    txtVideoStatus.setText("Status: Playing");
-                }
+        // PAUSE
+        btnVideoPause.setOnClickListener(v -> {
+            if (videoView.isPlaying()) {
+                videoView.pause();
+                txtVideoStatus.setText("Status: Paused");
             }
         });
 
-        // pause
-        btnVideoPause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (videoView.isPlaying()) {
-                    videoView.pause();
-                    txtVideoStatus.setText("Status: Paused");
-                }
+        // STOP + CLEAR
+        btnVideoStop.setOnClickListener(v -> {
+            if (videoReady) {
+                videoView.stopPlayback();
+                videoView.setVideoURI(null);
+
+                txtVideoStatus.setText("Status: Cleared");
+                videoReady = false;
             }
         });
 
-        // stop
-        btnVideoStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (videoReady) {
-                    videoView.stopPlayback();
-                    txtVideoStatus.setText("Status: Stopped");
-                    videoReady = false;
-                }
-            }
-        });
-
-        // restart
-        btnVideoRestart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (videoReady) {
-                    videoView.seekTo(0);
-                    if (!videoView.isPlaying()) {
-                        videoView.start();
-                    }
-                    txtVideoStatus.setText("Status: Playing");
-                } else {
-                    Toast.makeText(MainActivity.this,
-                            "Load a video first", Toast.LENGTH_SHORT).show();
-                }
+        // RESTART
+        btnVideoRestart.setOnClickListener(v -> {
+            if (videoReady) {
+                videoView.seekTo(0);
+                videoView.start();
             }
         });
     }
 
-    // pause audio when app goes to background
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (audioPlayer != null && audioPlayer.isPlaying()) {
-            audioPlayer.pause();
-            txtAudioStatus.setText("Status: Paused");
-        }
-    }
-
-    // release resources when activity is destroyed
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (audioPlayer != null) {
             audioPlayer.release();
-            audioPlayer = null;
         }
-        handler.removeCallbacksAndMessages(null);
     }
 }
