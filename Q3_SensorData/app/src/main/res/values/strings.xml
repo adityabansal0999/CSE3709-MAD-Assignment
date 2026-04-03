@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Sensor Data</string>
+    <string name="accelerometer">Accelerometer</string>
+    <string name="light">Light Sensor</string>
+    <string name="proximity">Proximity Sensor</string>
+    <string name="x_value">X: 0.00</string>
+    <string name="y_value">Y: 0.00</string>
+    <string name="z_value">Z: 0.00</string>
+    <string name="light_value">Light: 0.0 lux</string>
+    <string name="proximity_value">Proximity: -</string>
+    <string name="sensor_not_available">Sensor not available</string>
+</resources>
