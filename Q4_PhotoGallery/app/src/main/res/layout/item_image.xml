@@ -5,14 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
-    app:cardCornerRadius="6dp"
-    app:cardElevation="2dp">
+    app:cardCornerRadius="8dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="@color/white">
 
     <ImageView
         android:id="@+id/img_item"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="160dp"
         android:scaleType="centerCrop"
+        android:padding="2dp"
         android:contentDescription="Gallery image" />
 
 </androidx.cardview.widget.CardView>

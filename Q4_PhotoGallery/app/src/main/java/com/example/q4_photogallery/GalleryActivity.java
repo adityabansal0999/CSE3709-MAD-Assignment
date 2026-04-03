@@ -1,6 +1,7 @@
 package com.example.q4_photogallery;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -24,30 +25,30 @@ public class GalleryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
 
+        // enable back button in action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Gallery");
+        }
+
         recyclerGallery = findViewById(R.id.recycler_gallery);
         txtNoImages = findViewById(R.id.txt_no_images);
         txtGalleryTitle = findViewById(R.id.txt_gallery_title);
 
-        // get folder path from intent
         folderPath = getIntent().getStringExtra("folder_path");
 
-        txtGalleryTitle.setText("Gallery");
-
-        // use GridLayoutManager with 2 columns
+        // use GridLayoutManager with 2 columns for gallery look
         recyclerGallery.setLayoutManager(new GridLayoutManager(this, 2));
 
-        // load images
         loadImages();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // reload images when coming back from details (after delete)
         loadImages();
     }
 
-    // reads all image files from the folder and shows in grid
     private void loadImages() {
         imageList = new ArrayList<>();
         File folder = new File(folderPath);
@@ -57,7 +58,6 @@ public class GalleryActivity extends AppCompatActivity {
 
             if (files != null) {
                 for (File file : files) {
-                    // only add image files
                     if (file.isFile() && isImageFile(file.getName())) {
                         ImageItem item = new ImageItem(
                                 file.getName(),
@@ -71,7 +71,6 @@ public class GalleryActivity extends AppCompatActivity {
             }
         }
 
-        // show or hide "no images" message
         if (imageList.isEmpty()) {
             txtNoImages.setVisibility(View.VISIBLE);
             recyclerGallery.setVisibility(View.GONE);
@@ -84,10 +83,19 @@ public class GalleryActivity extends AppCompatActivity {
         recyclerGallery.setAdapter(imageAdapter);
     }
 
-    // checks if file is an image based on extension
     private boolean isImageFile(String name) {
         String lower = name.toLowerCase();
         return lower.endsWith(".jpg") || lower.endsWith(".jpeg") ||
                 lower.endsWith(".png") || lower.endsWith(".bmp");
+    }
+
+    // handle back button press in action bar
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

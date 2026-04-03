@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -27,16 +28,18 @@ public class MainActivity extends AppCompatActivity {
 
     EditText editFolderName;
     TextView txtFolderPath;
-    Button btnCreateFolder, btnTakePhoto, btnViewGallery;
+    Button btnCreateFolder, btnChooseFolder, btnTakePhoto, btnViewGallery;
 
     File chosenFolder;
     File currentPhotoFile;
 
     private static final int CAMERA_PERMISSION_CODE = 100;
 
-    // launcher for camera
     ActivityResultLauncher<Uri> cameraLauncher;
     Uri photoUri;
+
+    // folder picker launcher
+    ActivityResultLauncher<Uri> folderPicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +49,11 @@ public class MainActivity extends AppCompatActivity {
         editFolderName = findViewById(R.id.edit_folder_name);
         txtFolderPath = findViewById(R.id.txt_folder_path);
         btnCreateFolder = findViewById(R.id.btn_create_folder);
+        btnChooseFolder = findViewById(R.id.btn_choose_folder);
         btnTakePhoto = findViewById(R.id.btn_take_photo);
         btnViewGallery = findViewById(R.id.btn_view_gallery);
 
-        // setup camera launcher
+        // camera launcher
         cameraLauncher = registerForActivityResult(
                 new ActivityResultContracts.TakePicture(),
                 result -> {
@@ -57,9 +61,30 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(this, "Photo saved!", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(this, "Photo cancelled", Toast.LENGTH_SHORT).show();
-                        // delete empty file if photo was cancelled
                         if (currentPhotoFile != null && currentPhotoFile.exists()) {
                             currentPhotoFile.delete();
+                        }
+                    }
+                }
+        );
+
+        // folder picker launcher using document tree
+        folderPicker = registerForActivityResult(
+                new ActivityResultContracts.OpenDocumentTree(),
+                uri -> {
+                    if (uri != null) {
+                        // get folder path from URI
+                        DocumentFile pickedDir = DocumentFile.fromTreeUri(this, uri);
+                        if (pickedDir != null) {
+                            String folderName = pickedDir.getName();
+                            // create a local copy folder with same name
+                            chosenFolder = new File(getExternalFilesDir(null), folderName);
+                            if (!chosenFolder.exists()) {
+                                chosenFolder.mkdirs();
+                            }
+                            txtFolderPath.setText("Folder: " + chosenFolder.getAbsolutePath());
+                            Toast.makeText(this, "Folder selected: " + folderName,
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
@@ -73,13 +98,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // choose existing folder button
+        btnChooseFolder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                folderPicker.launch(null);
+            }
+        });
+
         // take photo button
         btnTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (chosenFolder == null) {
                     Toast.makeText(MainActivity.this,
-                            "Create a folder first", Toast.LENGTH_SHORT).show();
+                            "Select or create a folder first", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 checkCameraPermissionAndTakePhoto();
@@ -92,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (chosenFolder == null) {
                     Toast.makeText(MainActivity.this,
-                            "Create a folder first", Toast.LENGTH_SHORT).show();
+                            "Select or create a folder first", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
@@ -102,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // creates a folder in app's external files directory
     private void createFolder() {
         String folderName = editFolderName.getText().toString().trim();
         if (folderName.isEmpty()) {
@@ -125,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
         txtFolderPath.setText("Folder: " + chosenFolder.getAbsolutePath());
     }
 
-    // checks camera permission and takes photo
     private void checkCameraPermissionAndTakePhoto() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -137,7 +168,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // handles permission result
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
@@ -153,21 +183,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // opens camera and saves photo to chosen folder
     private void takePhoto() {
-        // create image file with timestamp name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                 Locale.getDefault()).format(new Date());
         String fileName = "IMG_" + timeStamp + ".jpg";
 
         currentPhotoFile = new File(chosenFolder, fileName);
 
-        // get URI using FileProvider
         photoUri = FileProvider.getUriForFile(this,
                 getApplicationContext().getPackageName() + ".fileprovider",
                 currentPhotoFile);
 
-        // launch camera
         cameraLauncher.launch(photoUri);
     }
 }
