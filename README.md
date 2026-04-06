@@ -22,13 +22,13 @@ Each question is implemented as a separate Android Studio project. All projects 
 ---
 
 ## Repository Structure
-
+'''
 CSE3709-MAD-Assignment/
 ├── Q1_CurrencyConverter/
 ├── Q2_AudioVideoPlayer/
 ├── Q3_SensorData/
 └── Q4_PhotoGallery/
-
+'''
 Each folder contains a complete Android Studio project with its own code, layouts and resources.
 ## Requirements
 
@@ -64,7 +64,7 @@ This app converts currency between INR, USD, EUR and JPY.
 User enters an amount, selects source and target currencies using dropdowns and presses convert. Result is shown on the screen.
 
 There is also a Settings screen where user can switch between Light and Dark theme. The selected theme is saved using SharedPreferences.
-
+'''
 Project structure:
 
 Q1_CurrencyConverter/
@@ -83,7 +83,7 @@ Q1_CurrencyConverter/
 │   └── values-night/
 │       └── themes.xml
 └── AndroidManifest.xml
-
+'''
 Concepts used:
 Activities, Intents, Spinner, ArrayAdapter, SharedPreferences, Themes
 
@@ -98,7 +98,7 @@ This app has two sections: audio player and video player.
 In audio section, user selects a file from device storage and can control playback using Play, Pause, Stop and Restart buttons. A SeekBar shows current position.
 
 In video section, a video is streamed from a URL and similar controls are provided.
-
+'''
 Project structure:
 
 Q2_AudioVideoPlayer/
@@ -114,7 +114,7 @@ Q2_AudioVideoPlayer/
 │   └── xml/
 │       └── network_security_config.xml
 └── AndroidManifest.xml
-
+'''
 Concepts used:
 MediaPlayer, VideoView, ActivityResultLauncher, Internet permission
 
@@ -127,7 +127,7 @@ Folder: Q3_SensorData
 This app reads and displays data from accelerometer, light sensor and proximity sensor.
 
 Values update in real time. If a sensor is not available on device, a message is shown.
-
+'''
 Project structure:
 
 Q3_SensorData/
@@ -141,7 +141,7 @@ Q3_SensorData/
 │   │   ├── strings.xml
 │   │   └── colors.xml
 └── AndroidManifest.xml
-
+'''
 Concepts used:
 SensorManager, SensorEventListener, Activity Lifecycle
 
@@ -154,7 +154,7 @@ Folder: Q4_PhotoGallery
 This app allows user to create or choose a folder, take photos using camera and store them in that folder.
 
 Images are displayed in a grid using RecyclerView. On clicking an image, details like name, path, size and date are shown. User can delete the image with confirmation dialog.
-
+'''
 Project structure:
 
 Q4_PhotoGallery/
@@ -178,7 +178,7 @@ Q4_PhotoGallery/
 │   └── xml/
 │       └── file_paths.xml
 └── AndroidManifest.xml
-
+'''
 Concepts used:
 Camera Intent, FileProvider, RecyclerView, Adapter, AlertDialog, File handling, Intents
 
