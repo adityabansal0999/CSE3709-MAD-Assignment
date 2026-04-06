@@ -93,6 +93,7 @@ Activities, Intents, Spinner, ArrayAdapter, SharedPreferences, Themes
 
 ## Project 2: Audio and Video Player
 
+
 **Folder:** `Q2_AudioVideoPlayer`
 
 This app has two sections: audio player and video player.
@@ -100,6 +101,7 @@ This app has two sections: audio player and video player.
 In audio section, user selects a file from device storage and can control playback using Play, Pause, Stop and Restart buttons. A SeekBar shows current position.
 
 In video section, a video is streamed from a URL and similar controls are provided.
+```
 Project structure:
 
 Q2_AudioVideoPlayer/
@@ -116,7 +118,7 @@ Q2_AudioVideoPlayer/
 │ └── network_security_config.xml
 └── AndroidManifest.xml
 
-
+```
 **Concepts used:**  
 MediaPlayer, VideoView, ActivityResultLauncher, Internet permission
 
@@ -152,6 +154,7 @@ SensorManager, SensorEventListener, Activity Lifecycle
 
 ## Project 4: Photo Gallery App
 
+```
 **Folder:** `Q4_PhotoGallery`
 
 This app allows user to create or choose a folder, take photos using camera and store them in that folder.
@@ -181,7 +184,7 @@ Q4_PhotoGallery/
 │ └── file_paths.xml
 └── AndroidManifest.xml
 
-
+```
 **Concepts used:**  
 Camera Intent, FileProvider, RecyclerView, Adapter, AlertDialog, File handling, Intents
 
