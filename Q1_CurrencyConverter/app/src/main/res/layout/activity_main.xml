@@ -1,53 +1,67 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:padding="20dp"
+    android:background="@color/bg"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
-    <!-- Amount Input -->
-    <EditText
-        android:id="@+id/amount"
-        android:hint="@string/enter_amount"
-        android:inputType="numberDecimal"
-        android:layout_marginTop="20dp"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:background="@color/primary"
+        android:title="@string/app_name"
+        android:titleTextColor="@android:color/white"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="56dp"/>
 
-    <!-- From Currency -->
-    <Spinner
-        android:id="@+id/fromCurrency"
+    <LinearLayout
+        android:padding="16dp"
+        android:paddingTop="10dp"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="match_parent">
 
-    <!-- To Currency -->
-    <Spinner
-        android:id="@+id/toCurrency"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/amount"
+            android:hint="@string/enter_amount"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-    <!-- Convert Button -->
-    <Button
-        android:id="@+id/convertBtn"
-        android:text="@string/convert"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        <Spinner
+            android:id="@+id/fromCurrency"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-    <!-- Result -->
-    <TextView
-        android:id="@+id/result"
-        android:text="Result"
-        android:textSize="18sp"
-        android:layout_marginTop="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        <ImageButton
+            android:id="@+id/swapBtn"
+            android:src="@drawable/ic_compare"
+            android:contentDescription="Swap"
+            android:background="@null"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"/>
 
-    <!-- Settings Button -->
-    <Button
-        android:id="@+id/settingsBtn"
-        android:text="@string/settings"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        <Spinner
+            android:id="@+id/toCurrency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
+        <Button
+            android:id="@+id/convertBtn"
+            android:text="@string/convert"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+        <TextView
+            android:id="@+id/result"
+            android:text="@string/default_result"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 </LinearLayout>

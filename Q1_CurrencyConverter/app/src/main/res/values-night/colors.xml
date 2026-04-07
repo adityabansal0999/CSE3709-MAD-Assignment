@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#121212</color>        <!-- dark background -->
+    <color name="primary">#80CBC4</color>   <!-- lighter teal for toolbar in dark mode -->
+    <color name="white">#FFFFFF</color>
+</resources>
