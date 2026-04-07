@@ -1,7 +1,10 @@
 package com.example.q2_audiovideoplayer;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.*;
@@ -9,6 +12,8 @@ import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 /**
  * Audio + Video Player App
@@ -34,18 +39,34 @@ public class MainActivity extends AppCompatActivity {
     TextView txtVideoStatus;
 
     boolean videoReady = false;
-
-    // ⭐ IMPORTANT: store last video URL
     String currentVideoUrl = "";
 
     Handler handler = new Handler();
-
     ActivityResultLauncher<String> filePicker;
+
+    private static final int PERMISSION_REQUEST_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Request audio permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_MEDIA_AUDIO},
+                        PERMISSION_REQUEST_CODE);
+            }
+        } else if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_CODE);
+            }
+        }
 
         // ===== AUDIO VIEWS =====
         btnOpenFile = findViewById(R.id.btn_open_file);
@@ -107,21 +128,26 @@ public class MainActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             Toast.makeText(this, "Error loading audio", Toast.LENGTH_SHORT).show();
+            audioReady = false;
         }
     }
 
     private void setupAudio() {
 
-        btnOpenFile.setOnClickListener(v -> filePicker.launch("audio/*"));
+        btnOpenFile.setOnClickListener(v -> {
+            filePicker.launch("audio/*");
+        });
 
         btnAudioPlay.setOnClickListener(v -> {
             if (!audioReady) {
                 Toast.makeText(this, "Select audio first", Toast.LENGTH_SHORT).show();
                 return;
             }
-            audioPlayer.start();
-            txtAudioStatus.setText("Status: Playing");
-            updateSeekBar();
+            if (!audioPlayer.isPlaying()) {
+                audioPlayer.start();
+                txtAudioStatus.setText("Status: Playing");
+                updateSeekBar();
+            }
         });
 
         btnAudioPause.setOnClickListener(v -> {
@@ -136,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
                 audioPlayer.stop();
                 txtAudioStatus.setText("Status: Stopped");
                 audioReady = false;
-
                 if (audioUri != null) loadAudio(audioUri);
             }
         });
@@ -144,8 +169,11 @@ public class MainActivity extends AppCompatActivity {
         btnAudioRestart.setOnClickListener(v -> {
             if (audioReady) {
                 audioPlayer.seekTo(0);
-                audioPlayer.start();
+                if (!audioPlayer.isPlaying()) {
+                    audioPlayer.start();
+                }
                 txtAudioStatus.setText("Status: Playing");
+                updateSeekBar();
             }
         });
 
@@ -161,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateSeekBar() {
-        if (audioPlayer.isPlaying()) {
+        if (audioPlayer != null && audioPlayer.isPlaying()) {
             seekbarAudio.setProgress(audioPlayer.getCurrentPosition());
             handler.postDelayed(this::updateSeekBar, 500);
         }
@@ -172,16 +200,12 @@ public class MainActivity extends AppCompatActivity {
     private void loadVideo(String url) {
         try {
             Uri uri = Uri.parse(url);
-
             videoView.setVideoURI(uri);
             txtVideoStatus.setText("Status: Loading...");
 
             videoView.setOnPreparedListener(mp -> {
                 videoReady = true;
                 txtVideoStatus.setText("Status: Ready");
-
-                videoView.start();
-                videoView.pause();
             });
 
             videoView.setOnCompletionListener(mp ->
@@ -189,50 +213,41 @@ public class MainActivity extends AppCompatActivity {
 
             videoView.setOnErrorListener((mp, what, extra) -> {
                 txtVideoStatus.setText("Status: Error");
-                Toast.makeText(this,
-                        "Video not supported / network issue",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Video not supported / network issue", Toast.LENGTH_LONG).show();
                 videoReady = false;
                 return true;
             });
 
             videoView.requestFocus();
-
         } catch (Exception e) {
             Toast.makeText(this, "Invalid URL", Toast.LENGTH_SHORT).show();
+            videoReady = false;
         }
     }
 
     private void setupVideo() {
 
-        // OPEN URL
         btnOpenUrl.setOnClickListener(v -> {
             String url = editUrl.getText().toString().trim();
             if (url.isEmpty()) {
                 Toast.makeText(this, "Enter URL", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            currentVideoUrl = url; // ⭐ SAVE URL
+            currentVideoUrl = url;
             loadVideo(url);
         });
 
-        // PLAY
         btnVideoPlay.setOnClickListener(v -> {
-
-            // ⭐ reload if cleared
             if (!videoReady && !currentVideoUrl.isEmpty()) {
                 loadVideo(currentVideoUrl);
                 return;
             }
-
-            if (videoReady) {
+            if (videoReady && !videoView.isPlaying()) {
                 videoView.start();
                 txtVideoStatus.setText("Status: Playing");
             }
         });
 
-        // PAUSE
         btnVideoPause.setOnClickListener(v -> {
             if (videoView.isPlaying()) {
                 videoView.pause();
@@ -240,22 +255,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // STOP + CLEAR
         btnVideoStop.setOnClickListener(v -> {
             if (videoReady) {
                 videoView.stopPlayback();
                 videoView.setVideoURI(null);
-
                 txtVideoStatus.setText("Status: Cleared");
                 videoReady = false;
             }
         });
 
-        // RESTART
         btnVideoRestart.setOnClickListener(v -> {
             if (videoReady) {
                 videoView.seekTo(0);
+                if (!videoView.isPlaying()) {
+                    videoView.start();
+                }
+                txtVideoStatus.setText("Status: Playing");
+            } else if (!currentVideoUrl.isEmpty()) {
+                loadVideo(currentVideoUrl);
+                videoView.seekTo(0);
                 videoView.start();
+                txtVideoStatus.setText("Status: Playing");
             }
         });
     }
@@ -265,6 +285,10 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         if (audioPlayer != null) {
             audioPlayer.release();
+            audioPlayer = null;
+        }
+        if (videoView != null) {
+            videoView.stopPlayback();
         }
     }
 }

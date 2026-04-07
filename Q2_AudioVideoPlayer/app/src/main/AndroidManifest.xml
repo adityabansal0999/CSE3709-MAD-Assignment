@@ -2,8 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- needed for streaming video from URL -->
+    <!-- Internet for streaming video -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Audio file read permissions for Android 13+ -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <!-- For older Android versions (API 32 and below) -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <application
         android:allowBackup="true"
@@ -27,4 +33,5 @@
         </activity>
 
     </application>
+
 </manifest>

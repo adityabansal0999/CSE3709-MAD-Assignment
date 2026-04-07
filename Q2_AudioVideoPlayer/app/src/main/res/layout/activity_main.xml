@@ -35,16 +35,15 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
-        <!-- open audio file from disk -->
         <Button
             android:id="@+id/btn_open_file"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Open Audio File"
             android:backgroundTint="@color/blue_primary"
+            android:drawableStart="@android:drawable/ic_menu_search"
             android:layout_marginBottom="8dp" />
 
-        <!-- shows selected file name -->
         <TextView
             android:id="@+id/txt_file_name"
             android:layout_width="match_parent"
@@ -54,7 +53,6 @@
             android:padding="8dp"
             android:layout_marginBottom="4dp" />
 
-        <!-- audio status -->
         <TextView
             android:id="@+id/txt_audio_status"
             android:layout_width="wrap_content"
@@ -65,14 +63,12 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="8dp" />
 
-        <!-- seekbar to show audio progress -->
         <SeekBar
             android:id="@+id/seekbar_audio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp" />
 
-        <!-- audio control buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -87,6 +83,7 @@
                 android:layout_weight="1"
                 android:layout_margin="2dp"
                 android:text="Play"
+                android:drawableStart="@android:drawable/ic_media_play"
                 android:backgroundTint="@color/green_play"
                 android:textSize="12sp" />
 
@@ -97,6 +94,7 @@
                 android:layout_weight="1"
                 android:layout_margin="2dp"
                 android:text="Pause"
+                android:drawableStart="@android:drawable/ic_media_pause"
                 android:backgroundTint="@color/orange_pause"
                 android:textSize="12sp" />
 
@@ -107,6 +105,7 @@
                 android:layout_weight="1"
                 android:layout_margin="2dp"
                 android:text="Stop"
+                android:drawableStart="@android:drawable/ic_menu_close_clear_cancel"
                 android:backgroundTint="@color/red_stop"
                 android:textSize="12sp" />
 
@@ -117,12 +116,12 @@
                 android:layout_weight="1"
                 android:layout_margin="2dp"
                 android:text="Restart"
+                android:drawableStart="@android:drawable/ic_menu_revert"
                 android:backgroundTint="@color/blue_light"
                 android:textSize="12sp" />
 
         </LinearLayout>
 
-        <!-- divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
@@ -139,7 +138,6 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
 
-        <!-- url input -->
         <EditText
             android:id="@+id/edit_url"
             android:layout_width="match_parent"
@@ -150,16 +148,15 @@
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
-        <!-- open url button -->
         <Button
             android:id="@+id/btn_open_url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Open URL"
             android:backgroundTint="@color/blue_primary"
+            android:drawableStart="@android:drawable/ic_menu_share"
             android:layout_marginBottom="8dp" />
 
-        <!-- video view -->
         <VideoView
             android:id="@+id/video_view"
             android:layout_width="match_parent"
@@ -167,7 +164,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="8dp" />
 
-        <!-- video status -->
         <TextView
             android:id="@+id/txt_video_status"
             android:layout_width="wrap_content"
@@ -178,7 +174,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="8dp" />
 
-        <!-- video control buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -193,6 +188,7 @@
                 android:layout_weight="1"
                 android:layout_margin="2dp"
                 android:text="Play"
+                android:drawableStart="@android:drawable/ic_media_play"
                 android:backgroundTint="@color/green_play"
                 android:textSize="12sp" />
 
@@ -203,6 +199,7 @@
                 android:layout_weight="1"
                 android:layout_margin="2dp"
                 android:text="Pause"
+                android:drawableStart="@android:drawable/ic_media_pause"
                 android:backgroundTint="@color/orange_pause"
                 android:textSize="12sp" />
 
@@ -213,6 +210,7 @@
                 android:layout_weight="1"
                 android:layout_margin="2dp"
                 android:text="Stop"
+                android:drawableStart="@android:drawable/ic_menu_close_clear_cancel"
                 android:backgroundTint="@color/red_stop"
                 android:textSize="12sp" />
 
@@ -223,6 +221,7 @@
                 android:layout_weight="1"
                 android:layout_margin="2dp"
                 android:text="Restart"
+                android:drawableStart="@android:drawable/ic_menu_revert"
                 android:backgroundTint="@color/blue_light"
                 android:textSize="12sp" />
 
